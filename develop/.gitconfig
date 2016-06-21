@@ -1,0 +1,10 @@
+[user]
+	email = martincharles07@gmail.com
+	name = Martin Charles
+[color]
+	ui = auto
+[core]
+	editor = vim
+	excludesfile = ~/.ignore
+[push]
+	default = nothing

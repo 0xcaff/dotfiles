@@ -1,0 +1,6 @@
+# Ignore vim temp and swap files.
+*~
+*.swp
+*.swo
+
+node_modules/
