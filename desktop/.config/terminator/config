@@ -1,0 +1,24 @@
+[global_config]
+  tab_position = hidden
+[keybindings]
+[layouts]
+  [[default]]
+    [[[child1]]]
+      parent = window0
+      type = Terminal
+    [[[window0]]]
+      parent = ""
+      type = Window
+[plugins]
+[profiles]
+  [[default]]
+    background_color = "#121722"
+    background_image = None
+    copy_on_selection = True
+    cursor_color = "#c0c5ce"
+    font = Knack Nerd Font 10
+    foreground_color = "#839496"
+    palette = "#2b303b:#bf616a:#a3be8c:#ebcb8b:#8fa1b3:#b48ead:#96b5b4:#c0c5ce:#65737e:#bf616a:#a3be8c:#ebcb8b:#8fa1b3:#b48ead:#96b5b4:#eff1f5"
+    scrollback_infinite = True
+    show_titlebar = False
+    use_system_font = False
