@@ -26,6 +26,7 @@ call vundle#end()
 
 " Enable use of file type plugin
 filetype plugin on
+syntax on
 
 " Indentation
 set shiftwidth=2
