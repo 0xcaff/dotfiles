@@ -1,8 +1,0 @@
-# desktop
-feh
-i3-wm
-i3block
-rofi
-terminator
-
-# install nerd fonts (Hack)

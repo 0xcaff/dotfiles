@@ -6,5 +6,6 @@
 [core]
 	editor = vim
 	excludesfile = ~/.ignore
+	autocrlf = input
 [push]
 	default = nothing

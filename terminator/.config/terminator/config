@@ -5,6 +5,7 @@
   [[default]]
     [[[child1]]]
       parent = window0
+      profile = default
       type = Terminal
     [[[window0]]]
       parent = ""
@@ -13,7 +14,6 @@
 [profiles]
   [[default]]
     background_color = "#121722"
-    background_image = None
     copy_on_selection = True
     cursor_color = "#c0c5ce"
     font = Knack Nerd Font 10

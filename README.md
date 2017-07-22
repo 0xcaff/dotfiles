@@ -10,4 +10,10 @@ To uninstall:
 
     stow -D develop
 
+## Dependencies
+* `gnome`:
+  * arc-gtk-theme
+
+* `terminator`:
+  * nerd fonts (hack)
 
