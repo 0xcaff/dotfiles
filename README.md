@@ -10,6 +10,11 @@ To uninstall:
 
     stow -D develop
 
+Some configurations need to be installed into the root directory. This can be
+done by calling:
+
+    stow --target=/ nginx
+
 ## Dependencies
 * `gnome`:
   * arc-gtk-theme

@@ -1,0 +1,12 @@
+[Unit]
+Description=Update the P-Nos Point Site
+
+[Service]
+Type=oneshot
+User=drone
+WorkingDirectory=/home/drone/projects/nos-stock/viewer
+ExecStart=/home/drone/projects/nos-stock/nodeenv.sh yarn run deploy
+
+[Install]
+WantedBy=multi-user.target
+

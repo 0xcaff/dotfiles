@@ -1,0 +1,9 @@
+[Unit]
+Description=Update the P-Nos Point Site Daily
+
+[Timer]
+OnCalendar=daily
+Persistent=true
+
+[Install]
+WantedBy=timers.target

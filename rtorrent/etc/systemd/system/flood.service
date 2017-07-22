@@ -1,0 +1,12 @@
+[Unit]
+Description=rTorrent Flood Web UI
+Requires=rtorrent.service
+
+[Service]
+Type=simple
+User=rtorrent
+WorkingDirectory=/home/rtorrent/flood/
+ExecStart=/usr/bin/npm start
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,12 @@
+# This file is an example configuration for push-sub. You can find more
+# information about the project at https://github.com/0xcaff/sub
+address="127.0.0.1:17889"
+basepath="https://hub.ydns.eu/"
+
+[subscriptions.asalomondrin]
+topic="https://www.youtube.com/xml/feeds/videos.xml?channel_id=UCiGMIk8oeayv91jjTgm-CIw"
+command=[
+  "/home/drone/projects/nos-stock/venv/bin/python",
+  "/home/drone/projects/nos-stock/on_message.py",
+]
+

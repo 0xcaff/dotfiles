@@ -1,0 +1,11 @@
+[Unit]
+Description=PubSubHubbub Subscriber
+Requires=network-online.target
+
+[Service]
+Type=simple
+User=drone
+ExecStart=/home/drone/go/bin/push-sub -config /opt/push-sub.config.toml -verbosity 10
+
+[Install]
+WantedBy=multi-user.target
