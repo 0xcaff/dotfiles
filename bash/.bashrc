@@ -12,11 +12,10 @@ export ANDROID_EMULATOR_USE_SYSTEM_LIBS=1
 
 # Set up NVM
 # Lazily initialize nvm to keep shell start up time fast.
+# https://github.com/creationix/nvm/issues/860
 export NVM_DIR="$HOME/.nvm"
 export NVM_SH="$NVM_DIR/nvm.sh"
-source $NVM_SH
 
-# https://github.com/creationix/nvm/issues/860
 declare -a NODE_GLOBALS=(`find $NVM_DIR/versions/node -maxdepth 3 -type l -wholename '*/bin/*' | xargs -n1 basename | sort | uniq`)
 
 NODE_GLOBALS+=("node")
@@ -40,5 +39,6 @@ for cmd in "${NODE_GLOBALS[@]}"; do
     eval "function ${cmd} () { unhook_nvm_load; load_nvm; ${cmd} \$@; }"
 done
 
+export EDITOR=vim
 export GOPATH=~/go
 export PATH=$PATH:$GOPATH/bin
