@@ -1,0 +1,13 @@
+[Unit]
+Description=A stack of applications for torrenting over a VPN securely.
+Requires=docker.service network-online.target
+After=docker.service network-online.target
+
+[Service]
+Restart=always
+WorkingDirectory=/etc/docker/compose/torrent-stack/
+ExecStart=/usr/bin/docker-compose up
+ExecStop=/usr/bin/docker-compose down
+
+[Install]
+WantedBy=multi-user.target

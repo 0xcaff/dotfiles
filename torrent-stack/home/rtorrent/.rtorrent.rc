@@ -9,6 +9,8 @@
 # download_rate = 200
 # upload_rate = 28
 
+system.daemon.set = true
+
 check_hash = yes
 directory = ~/downloaded
 session = ~/.rtorrent.session
@@ -25,6 +27,6 @@ encryption = allow_incoming,try_outgoing,enable_retry
 
 dht = auto
 dht_port = 6881
-peer_exchange = yes
+# peer_exchange = yes
 
-scgi_port = 127.0.0.1:5000
+scgi_port = 0.0.0.0:5000

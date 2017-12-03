@@ -1,0 +1,69 @@
+version: '3.4'
+
+# TODO:
+# * Automatically find best NordVPN Server and connect to it.
+#
+#   https://nordvpn.com/api/server
+#   https://nordvpn.com/api/server/stats
+#   https://nordvpn.com/servers/#recommended
+
+# A service template which creates an openvpn tunnel.
+x-vpn: &vpnClient
+  image: dperson/openvpn-client
+  cap_add:
+    - net_admin
+  dns:
+    - 8.8.4.4
+    - 8.8.8.8
+  read_only: true
+  tmpfs:
+    - /tmp
+  restart: unless-stopped
+  security_opt:
+    - label:disable
+  devices:
+    - /dev/net/tun
+
+# Ensures that a service can only access the network over a VPN. A service with
+# the name "vpn" must be present with the vpnClient template above.
+x-behind-vpn: &vpnConsumer
+  depends_on:
+    - vpn
+  network_mode: service:vpn
+
+services:
+  rtorrent:
+    image: quay.io/0xcaff/rtorrent:latest
+    <<: *vpnConsumer
+    restart: unless-stopped
+    stdin_open: true
+    tty: true
+    volumes:
+      - /home/rtorrent/:/rtorrent
+
+  flood:
+    image: quay.io/0xcaff/flood:dockerfile
+    depends_on:
+      - rtorrent
+    links:
+      - vpn:rtorrent
+    ports:
+      - 3000:3000
+    restart: unless-stopped
+    volumes:
+      - flood:/data
+    environment:
+      FLOOD_BASE_URI: /
+      RTORRENT_SCGI_HOST: rtorrent
+      RTORRENT_SCGI_PORT: 5000
+
+  vpn:
+    <<: *vpnClient
+    volumes:
+      - type: bind
+        source: ./vpn/
+        target: /vpn/
+
+volumes:
+  flood:
+    driver: local
