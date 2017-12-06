@@ -13,8 +13,8 @@ x-vpn: &vpnClient
   cap_add:
     - net_admin
   dns:
-    - 8.8.4.4
     - 8.8.8.8
+    - 8.8.4.4
   read_only: true
   tmpfs:
     - /tmp
@@ -24,11 +24,19 @@ x-vpn: &vpnClient
   devices:
     - /dev/net/tun
 
+  # The only traffic allowed out of this container is traffic to this network
+  # and TCP/UDP from the vpn linux group.
+  networks:
+    - local
+
 # Ensures that a service can only access the network over a VPN. A service with
 # the name "vpn" must be present with the vpnClient template above.
 x-behind-vpn: &vpnConsumer
   depends_on:
     - vpn
+
+  # Share the network stack of the vpn client container. When this container
+  # binds ports, they can be reached through the vpn service.
   network_mode: service:vpn
 
 services:
@@ -36,26 +44,31 @@ services:
     image: quay.io/0xcaff/rtorrent:latest
     <<: *vpnConsumer
     restart: unless-stopped
+    # When rtorrent isn't running in daemon mode, it needs standard input and a
+    # tty for curses.
     stdin_open: true
     tty: true
     volumes:
       - /home/rtorrent/:/rtorrent
 
   flood:
-    image: quay.io/0xcaff/flood:dockerfile
+    image: flood
     depends_on:
       - rtorrent
-    links:
-      - vpn:rtorrent
-    ports:
-      - 3000:3000
     restart: unless-stopped
     volumes:
       - flood:/data
     environment:
       FLOOD_BASE_URI: /
-      RTORRENT_SCGI_HOST: rtorrent
+      RTORRENT_SCGI_HOST: vpn
       RTORRENT_SCGI_PORT: 5000
+      # The virtual host used with jwilder/nginx-proxy.
+      VIRTUAL_HOST: flood.*
+    expose:
+      - 3000
+    networks:
+      - local
+      - ingress
 
   vpn:
     <<: *vpnClient
@@ -67,3 +80,15 @@ services:
 volumes:
   flood:
     driver: local
+
+networks:
+  # A network for connecting flood to rtorrent (and the vpn service). This also
+  # provides access to the internet for flood, rtorrent and the vpn. The vpn
+  # container is responsible for firewalling traffic from rtorrent.
+  local:
+
+  # The network on which flood exposes itself on to be seen by
+  # jwilder/nginx-proxy.
+  ingress:
+    external:
+      name: ingress-nginx

@@ -1,7 +1,7 @@
 [Unit]
 Description=A stack of applications for torrenting over a VPN securely.
-Requires=docker.service network-online.target
-After=docker.service network-online.target
+Requires=docker.service network-online.target nginx-ingress.service
+After=docker.service network-online.target nginx-ingress.service
 
 [Service]
 Restart=always
