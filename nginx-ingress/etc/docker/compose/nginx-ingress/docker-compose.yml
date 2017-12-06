@@ -1,0 +1,40 @@
+version: '3.4'
+services:
+  # Handles ingress traffic.
+  nginx:
+    container_name: nginx
+    image: nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./generated:/etc/nginx/conf.d
+      - ./certs:/etc/nginx/certs:ro
+    networks:
+      - ingress
+
+  # Generates and updates the configuration for nginx from running container
+  # metadata.
+  dockergen:
+    image: jwilder/docker-gen
+    command: -notify-sighup nginx -watch /etc/docker-gen/templates/nginx.tmpl /etc/nginx/conf.d/default.conf
+    networks:
+      - ingress
+    volumes:
+      - ./generated:/etc/nginx/conf.d
+      - ./certs:/etc/nginx/certs
+      - ./nginx.tmpl:/etc/docker-gen/templates/nginx.tmpl
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+
+  # A test container to check whether routing is working correctly.
+  whoami:
+    image: jwilder/whoami
+    environment:
+      - VIRTUAL_HOST=whoami.*
+    networks:
+      - ingress
+
+# Proxy traffic to containers on the ingress network.
+networks:
+  ingress:
+    external:
+      name: ingress-nginx

@@ -1,0 +1,13 @@
+[Unit]
+Description=A ingress proxy for directing traffic to docker containers.
+Requires=docker.service network-online.target
+After=docker.service network-online.target
+
+[Service]
+Restart=always
+WorkingDirectory=/etc/docker/compose/nginx-ingress/
+ExecStart=/usr/bin/docker-compose up
+ExecStop=/usr/bin/docker-compose down
+
+[Install]
+WantedBy=multi-user.target
