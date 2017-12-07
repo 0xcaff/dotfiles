@@ -74,8 +74,11 @@ services:
     <<: *vpnClient
     volumes:
       - type: bind
-        source: ./vpn/
-        target: /vpn/
+        source: ./vpn/conf.ovpn
+        target: /vpn/conf.ovpn
+      - type: bind
+        source: ./vpn/creds.txt
+        target: /vpn/creds.txt
 
 volumes:
   flood:
