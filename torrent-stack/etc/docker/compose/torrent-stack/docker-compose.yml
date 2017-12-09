@@ -7,49 +7,71 @@ version: '3.4'
 #   https://nordvpn.com/api/server/stats
 #   https://nordvpn.com/servers/#recommended
 
-# A service template which creates an openvpn tunnel.
-x-vpn: &vpnClient
-  image: dperson/openvpn-client
-  cap_add:
-    - net_admin
-  dns:
-    - 8.8.8.8
-    - 8.8.4.4
-  read_only: true
-  tmpfs:
-    - /tmp
-  restart: unless-stopped
-  security_opt:
-    - label:disable
-  devices:
-    - /dev/net/tun
-
-  # The only traffic allowed out of this container is traffic to this network
-  # and TCP/UDP from the vpn linux group.
-  networks:
-    - local
-
-# Ensures that a service can only access the network over a VPN. A service with
-# the name "vpn" must be present with the vpnClient template above.
-x-behind-vpn: &vpnConsumer
-  depends_on:
-    - vpn
-
-  # Share the network stack of the vpn client container. When this container
-  # binds ports, they can be reached through the vpn service.
-  network_mode: service:vpn
-
 services:
+  # This container sets up a firewall which only allows traffic to the docker
+  # network and the specified destination (ip, port protocol). See its repo for
+  # more information: https://github.com/0xcaff/docker-simple-firewall
+  firewall:
+    image: quay.io/0xcaff/simple-firewall:latest
+    cap_add:
+      - net_admin
+    env_file:
+      - ./vpn/environment.env
+    environment:
+      ALLOW_PORT: 1194
+      ALLOW_PROTO: udp
+
+      # TCP connections will be accepted at this port once the firewall is
+      # configured.
+      FIREWALL_READY_SIGNAL_PORT: 60000
+
+    # The only traffic allowed out of this container is traffic to this network
+    # and traffic to the specified ip address.
+    networks:
+      - local
+
+  # A service which creates an openvpn tunnel.
+  vpn:
+    image: quay.io/0xcaff/openvpn-client:latest
+    cap_add:
+      - net_admin
+    devices:
+      - /dev/net/tun
+
+    network_mode: service:firewall
+
+    volumes:
+      - ./wait-for/wait-for:/wait-for
+      - ./vpn/conf.ovpn:/vpn/config/config.ovpn
+      - ./vpn/creds.txt:/vpn/config/creds.txt
+
+    command: "/wait-for localhost:60000 -- openvpn --config /vpn/config/config.ovpn"
+
   rtorrent:
     image: quay.io/0xcaff/rtorrent:latest
-    <<: *vpnConsumer
-    restart: unless-stopped
+
+    # Share the network stack of the vpn client container. When this container
+    # binds ports, they can be reached through the "firewall" service.
+    network_mode: service:firewall
+
     # When rtorrent isn't running in daemon mode, it needs standard input and a
     # tty for curses.
     stdin_open: true
     tty: true
+
+    # SCGI is exposed on port 5000.
+
     volumes:
-      - /home/rtorrent/:/rtorrent
+      - ./rtorrent/.rtorrent.rc:/rtorrent/.rtorrent.rc
+      - /home/rtorrent/downloaded:/rtorrent/downloaded
+      - /home/rtorrent/.rtorrent.session:/rtorrent/.rtorrent.session
+      - ./wait-for/wait-for:/wait-for
+
+    entrypoint: "/bin/sh"
+
+    # Waits for the firewall to be set up before running rtorrent. The VPN may
+    # or may not be ready but no traffic will be leaked because of the firewall.
+    command: "/wait-for localhost:60000 -- rtorrent"
 
   flood:
     image: flood
@@ -60,25 +82,17 @@ services:
       - flood:/data
     environment:
       FLOOD_BASE_URI: /
-      RTORRENT_SCGI_HOST: vpn
+      RTORRENT_SCGI_HOST: firewall
       RTORRENT_SCGI_PORT: 5000
       # The virtual host used with jwilder/nginx-proxy.
       VIRTUAL_HOST: flood.*
+
     expose:
       - 3000
+
     networks:
       - local
       - ingress
-
-  vpn:
-    <<: *vpnClient
-    volumes:
-      - type: bind
-        source: ./vpn/conf.ovpn
-        target: /vpn/conf.ovpn
-      - type: bind
-        source: ./vpn/creds.txt
-        target: /vpn/creds.txt
 
 volumes:
   flood:

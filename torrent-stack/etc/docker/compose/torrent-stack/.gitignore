@@ -1,3 +1,5 @@
 vpn/creds.txt
 vpn/conf.d/0_base.conf
 vpn/nord_servers
+vpn/environment.env
+vpn/conf.ovpn
