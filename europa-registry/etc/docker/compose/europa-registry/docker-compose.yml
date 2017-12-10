@@ -1,0 +1,51 @@
+version: '3.4'
+
+# A container registry. I choose this one because it was easy to install (vs
+# harbor). It looks a bit old.
+
+services:
+  database:
+    image: mysql/mysql-server:5.7
+    expose:
+      - 3306
+    volumes:
+      - mysql:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: europa
+      MYSQL_USER: europa
+      MYSQL_PASSWORD: europa
+    networks:
+      - local
+
+  europa:
+    image: distelli/europa:latest
+    depends_on:
+      - database
+    expose:
+      - 80
+    volumes:
+      - repos:/europa/repo
+    environment:
+      EUROPA_DB_ENDPOINT: mysql://database:3306/europa
+      EUROPA_DB_USER: europa
+      EUROPA_DB_PASS: europa
+      VIRTUAL_HOST: registry.*
+    networks:
+      - ingress
+      - local
+
+volumes:
+  mysql:
+    driver: local
+  repos:
+    driver: local
+
+networks:
+  local:
+
+  # The network on which flood exposes itself on to be seen by
+  # jwilder/nginx-proxy.
+  ingress:
+    external:
+      name: ingress-nginx
