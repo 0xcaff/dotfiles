@@ -1,7 +1,7 @@
 [Unit]
 Description=The europa container registry.
-Requires=docker.service
-After=docker.service
+Requires=docker.service nginx-ingress.service
+After=docker.service nginx-ingress.service
 
 [Service]
 Restart=always
