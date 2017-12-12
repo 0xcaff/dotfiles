@@ -1,0 +1,48 @@
+version: '3.4'
+
+services:
+  koel:
+    image: registry.10.0.1.2.xip.io/koel
+    depends_on:
+      - database
+
+    expose:
+      - 80
+
+    environment:
+      # The virtual host used with jwilder/nginx-proxy.
+      VIRTUAL_HOST: koel.*
+
+      DB_CONNECTION: pqsql
+      DB_HOST: database
+      DB_USERNAME: koel
+      DB_PASSWORD: koel
+      DB_DATABASE: koel
+
+    networks:
+      - local
+      - ingress
+
+    # TODO: Add Music Directory
+
+  database:
+    image: postgres:10.1
+
+    environment:
+      POSTGRES_USER: koel
+      POSTGRES_PASSWORD: koel
+      POSTGRES_DB: koel
+
+    volumes:
+      - db:/var/lib/postgresql/data
+
+volumes:
+  db:
+    driver: local
+
+networks:
+  local:
+
+  ingress:
+    external:
+      name: ingress-nginx

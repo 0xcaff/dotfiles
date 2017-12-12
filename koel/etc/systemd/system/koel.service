@@ -1,0 +1,13 @@
+[Unit]
+Description=A personal music streaming server that works.
+Requires=docker.service network-online.target nginx-ingress.service
+After=docker.service network-online.target nginx-ingress.service
+
+[Service]
+Restart=always
+WorkingDirectory=/etc/docker/compose/koel/
+ExecStart=/usr/bin/docker-compose up
+ExecStop=/usr/bin/docker-compose down
+
+[Install]
+WantedBy=multi-user.target
